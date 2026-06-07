@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan de Estudios · Ing. Electrónica 2023 · UNCA</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════ TOKENS */
+:root {
+  --bg:#0b0d11;--surface:#12151c;--surface2:#181c26;--border:#1c2030;
+  --text:#e4e7f0;--muted:#4a5068;--accent:#4f9eff;
+  --apr:#22c55e;--reg:#f59e0b;--cur:#4f9eff;
+  --y1:#3ecf8e;--y2:#4f9eff;--y3:#a78bfa;--y4:#f59e0b;--y5:#ef4444;
+  --edit-accent:#f97316;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+
+/* ═══════════════════════════════════════════ HEADER */
+header{
+  padding:13px 24px 11px;border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:200;
+  background:rgba(11,13,17,.97);backdrop-filter:blur(14px);
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+}
+.hl h1{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.06em;}
+.hl p{font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px;}
+.header-right{display:flex;gap:8px;align-items:center;}
+
+/* ═══════════════════════════════════════════ EDIT BANNER */
+.edit-banner{
+  display:none;padding:8px 24px;
+  background:rgba(249,115,22,.07);border-bottom:2px solid rgba(249,115,22,.35);
+  font-size:10.5px;color:#fb923c;font-family:'Space Mono',monospace;
+  align-items:center;gap:10px;
+}
+.edit-banner.on{display:flex;}
+.edit-banner strong{color:#fdba74;}
+
+/* ═══════════════════════════════════════════ STATS */
+.stats{
+  padding:8px 24px;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;gap:18px;flex-wrap:wrap;align-items:center;
+}
+.stat{display:flex;flex-direction:column;font-family:'Space Mono',monospace;}
+.sv{font-size:18px;font-weight:700;}
+.sl{font-size:7px;color:var(--muted);letter-spacing:.08em;margin-top:1px;}
+.sv.g{color:var(--apr);}.sv.a{color:var(--reg);}.sv.b{color:var(--cur);}
+
+/* ═══════════════════════════════════════════ TABS */
+.tabs{padding:0 24px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;}
+.tab{
+  padding:10px 18px;font-size:11px;font-family:'Space Mono',monospace;letter-spacing:.04em;
+  cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all .15s;
+  background:none;border-top:none;border-left:none;border-right:none;
+}
+.tab:hover{color:var(--text);}
+.tab.act{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* ═══════════════════════════════════════════ CONTROLS */
+.controls{
+  padding:8px 24px;border-bottom:1px solid var(--border);
+  display:flex;gap:6px;align-items:center;flex-wrap:wrap;
+}
+.btn{
+  padding:4px 11px;border-radius:5px;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);font-size:10.5px;
+  cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .14s;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent);}
+.btn.act{background:var(--accent);border-color:var(--accent);color:#000;font-weight:600;}
+.btn.g{background:rgba(34,197,94,.09);border-color:rgba(34,197,94,.26);color:#4ade80;}
+.btn.g.act{background:var(--apr);color:#000;}
+.btn.a{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.22);color:#fbbf24;}
+.btn.a.act{background:var(--reg);color:#000;}
+.btn.b{background:rgba(79,158,255,.08);border-color:rgba(79,158,255,.22);color:#60a5fa;}
+.btn.b.act{background:var(--cur);color:#000;}
+.btn.edit-btn{
+  background:rgba(249,115,22,.09);border-color:rgba(249,115,22,.32);color:#fb923c;
+  font-family:'Space Mono',monospace;font-size:10px;
+}
+.btn.edit-btn:hover{border-color:#f97316;color:#fdba74;}
+.btn.done-btn{
+  background:rgba(34,197,94,.13);border-color:rgba(34,197,94,.38);color:#4ade80;
+  font-family:'Space Mono',monospace;font-size:10px;font-weight:700;
+}
+.btn.save-btn{background:rgba(79,158,255,.1);border-color:rgba(79,158,255,.28);color:#60a5fa;font-size:9.5px;}
+
+.info-bar{
+  padding:7px 24px;background:rgba(79,158,255,.04);border-bottom:1px solid rgba(79,158,255,.09);
+  font-size:10px;color:var(--accent);font-family:'Space Mono',monospace;
+  min-height:32px;display:flex;align-items:center;gap:8px;line-height:1.5;
+}
+.info-bar.empty{opacity:.28;}
+
+/* ═══════════════════════════════════════════ MAP */
+.tab-panel{display:none;flex:1;}.tab-panel.on{display:block;}
+.cw{padding:22px;overflow-x:auto;}
+.canvas{position:relative;min-width:1400px;}
+svg.arr{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;}
+.yc{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;position:relative;}
+.yco{display:flex;flex-direction:column;}
+.yh{
+  font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);padding:0 0 7px 3px;border-bottom:1px solid var(--border);margin-bottom:10px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.yh .hs{color:var(--accent);font-size:7px;}
+.sg{margin-bottom:12px;}
+.sl2{font-size:7px;color:var(--muted);letter-spacing:.07em;padding:2px 0 5px;opacity:.4;font-family:'Space Mono',monospace;}
+
+/* nodes */
+.node{
+  position:relative;border-radius:7px;padding:7px 9px;margin-bottom:5px;
+  transition:all .16s;user-select:none;border:1px solid var(--border);
+}
+.node.aprobada{background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.3);}
+.node.regular{background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.32);}
+.node.regular.vc-pronto{border-color:rgba(245,158,11,.65);box-shadow:0 0 8px rgba(245,158,11,.12);}
+.node.regular.vc-critico{border-color:rgba(239,68,68,.65);box-shadow:0 0 10px rgba(239,68,68,.18);background:rgba(239,68,68,.06);}
+.node.cursable{background:rgba(79,158,255,.09);border-color:rgba(79,158,255,.4);box-shadow:0 0 7px rgba(79,158,255,.07);}
+.node.cursable-warn{background:rgba(79,158,255,.06);border-color:rgba(79,158,255,.28);border-style:dashed;}
+.node.bloqueada{background:rgba(22,26,38,.4);border-color:rgba(22,26,38,.7);opacity:.3;}
+
+/* edit mode */
+.edit-mode .node{cursor:pointer!important;opacity:1!important;}
+.edit-mode .node:hover{border-color:var(--edit-accent)!important;box-shadow:0 0 0 2px rgba(249,115,22,.18)!important;transform:translateY(-1px);}
+/* view mode */
+.view-mode .node.aprobada:hover{border-color:var(--apr);box-shadow:0 0 0 2px rgba(34,197,94,.14);cursor:pointer;}
+.view-mode .node.regular:hover{border-color:var(--reg);box-shadow:0 0 0 2px rgba(245,158,11,.14);cursor:pointer;}
+.view-mode .node.cursable:hover{border-color:var(--cur);box-shadow:0 0 0 2px rgba(79,158,255,.2);transform:translateY(-1px);cursor:pointer;}
+.view-mode .node.cursable-warn:hover{border-color:var(--cur);box-shadow:0 0 0 2px rgba(79,158,255,.15);transform:translateY(-1px);cursor:pointer;}
+.view-mode .node.bloqueada{cursor:default;}
+
+.node.sel-on{border-color:#fff!important;box-shadow:0 0 0 2px rgba(255,255,255,.13)!important;transform:translateY(-1px);}
+.node.sel-pre{border-color:#a78bfa!important;background:rgba(167,139,250,.1)!important;}
+.node.sel-pos{border-color:#f59e0b!important;background:rgba(245,158,11,.09)!important;}
+.node.sel-dim{opacity:.07!important;}
+
+.lb{position:absolute;left:0;top:4px;bottom:4px;width:3px;border-radius:2px;}
+.y1-b{background:var(--y1);}.y2-b{background:var(--y2);}.y3-b{background:var(--y3);}.y4-b{background:var(--y4);}.y5-b{background:var(--y5);}
+.nc{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-bottom:2px;}
+.nn{font-size:10.5px;font-weight:500;line-height:1.3;}
+.node.aprobada .nn{color:#86efac;}
+.node.regular .nn{color:#fcd34d;}
+.node.cursable .nn{color:#93c5fd;}
+.node.cursable-warn .nn{color:#93c5fd;}
+.node.bloqueada .nn{color:#252d48;}
+.nm{display:flex;gap:4px;margin-top:4px;align-items:center;flex-wrap:wrap;}
+.tag{padding:1px 4px;border-radius:3px;font-size:7px;font-family:'Space Mono',monospace;font-weight:700;}
+.tcb{background:rgba(34,211,238,.08);color:#67e8f9;}
+.ttb{background:rgba(167,139,250,.08);color:#c4b5fd;}
+.tta{background:rgba(79,158,255,.08);color:#93c5fd;}
+.tcc{background:rgba(107,114,128,.12);color:#9ca3af;}
+.sb{padding:1px 4px;border-radius:3px;font-size:7px;font-family:'Space Mono',monospace;font-weight:700;}
+.sa{background:rgba(34,197,94,.15);color:#4ade80;}
+.sr{background:rgba(245,158,11,.15);color:#fbbf24;}
+.sc{background:rgba(79,158,255,.15);color:#60a5fa;}
+.sf{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.2);}
+.sd{background:rgba(239,68,68,.18);color:#fca5a5;}
+
+/* arrows */
+.al{fill:none;stroke:rgba(30,40,68,.52);stroke-width:1.1;marker-end:url(#ad);}
+.al.ap{stroke:#a78bfa!important;stroke-width:2.1!important;opacity:1!important;marker-end:url(#apre)!important;}
+.al.ao{stroke:#f59e0b!important;stroke-width:2.1!important;opacity:1!important;marker-end:url(#apos)!important;}
+.al.ad{opacity:.022!important;}
+
+/* ═══════════════════════════════════════════ MODAL */
+.overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
+  z-index:500;backdrop-filter:blur(4px);align-items:center;justify-content:center;
+}
+.overlay.on{display:flex;}
+.modal{
+  background:var(--surface2);border:1px solid var(--border);border-radius:12px;
+  width:380px;max-width:94vw;overflow:hidden;
+  box-shadow:0 24px 60px rgba(0,0,0,.55);
+}
+.mh{padding:15px 20px 13px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;}
+.mt{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.03em;}
+.mc{font-size:8px;color:var(--muted);margin-top:3px;}
+.mx{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:0;transition:color .12s;}
+.mx:hover{color:var(--text);}
+.mb{padding:18px 20px;}
+.mlb{font-size:9.5px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:.05em;margin-bottom:10px;}
+
+.sp{display:flex;gap:8px;margin-bottom:18px;}
+.spo{flex:1;padding:10px 6px;border-radius:8px;border:1px solid var(--border);cursor:pointer;text-align:center;transition:all .14s;background:var(--surface);}
+.spo:hover{border-color:var(--muted);}
+.spo.s-apr{border-color:var(--apr);background:rgba(34,197,94,.1);}
+.spo.s-reg{border-color:var(--reg);background:rgba(245,158,11,.1);}
+.spo.s-lib{border-color:rgba(74,80,104,.6);background:rgba(28,32,48,.5);}
+.sp-ic{font-size:19px;margin-bottom:4px;}
+.sp-lb{font-size:8.5px;font-family:'Space Mono',monospace;color:var(--muted);}
+.spo.s-apr .sp-lb{color:#4ade80;}
+.spo.s-reg .sp-lb{color:#fbbf24;}
+
+.fg{margin-bottom:13px;}
+.fg label{display:block;font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:5px;letter-spacing:.04em;}
+.fg input{
+  width:100%;background:var(--surface);border:1px solid var(--border);
+  border-radius:6px;padding:8px 10px;color:var(--text);font-size:12px;
+  font-family:'DM Sans',sans-serif;outline:none;transition:border-color .12s;
+}
+.fg input:focus{border-color:var(--accent);}
+.fg input[type="date"]{color-scheme:dark;}
+.xf{display:none;}.xf.on{display:block;}
+
+.mf{padding:13px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;align-items:center;}
+.bp{padding:7px 18px;border-radius:6px;border:none;cursor:pointer;background:var(--accent);color:#000;font-size:11px;font-weight:600;font-family:'DM Sans',sans-serif;transition:all .12s;}
+.bp:hover{background:#7ab8ff;}
+.bs{padding:7px 14px;border-radius:6px;border:1px solid var(--border);cursor:pointer;background:none;color:var(--muted);font-size:11px;font-family:'DM Sans',sans-serif;transition:all .12s;}
+.bs:hover{color:var(--text);border-color:var(--muted);}
+.bd{padding:7px 14px;border-radius:6px;border:1px solid rgba(239,68,68,.28);cursor:pointer;background:rgba(239,68,68,.07);color:#fca5a5;font-size:11px;font-family:'DM Sans',sans-serif;transition:all .12s;margin-right:auto;}
+.bd:hover{background:rgba(239,68,68,.14);}
+
+/* ═══════════════════════════════════════════ PANEL */
+.panel{padding:24px;max-width:1100px;}
+.ps{margin-bottom:28px;}
+.pt{
+  font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:13px;display:flex;align-items:center;gap:8px;
+}
+.pt::after{content:'';flex:1;height:1px;background:var(--border);}
+.pc{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 7px;font-size:8.5px;color:var(--muted);}
+
+.rl{display:flex;flex-direction:column;gap:7px;}
+.rc{
+  display:flex;align-items:center;gap:12px;padding:11px 14px;
+  border-radius:8px;border:1px solid var(--border);background:var(--surface);transition:border-color .14s;
+}
+.rc:hover{border-color:var(--muted);}
+.ud{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.rn{font-size:11.5px;font-weight:500;flex:1;line-height:1.3;}
+.rk{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);margin-top:1px;}
+.rd{text-align:right;flex-shrink:0;}
+.rdy{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;}
+.re{font-size:8px;color:var(--muted);margin-top:1px;}
+.cr{color:#ef4444;}.co{color:#f59e0b;}.cg{color:#22c55e;}
+
+.ag{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:7px;}
+.ac{
+  padding:10px 12px;border-radius:7px;border:1px solid rgba(34,197,94,.2);
+  background:rgba(34,197,94,.05);display:flex;justify-content:space-between;align-items:center;
+}
+.an{font-size:11px;color:#86efac;font-weight:500;flex:1;padding-right:8px;line-height:1.3;}
+.aN{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--apr);flex-shrink:0;}
+.cc2{
+  padding:10px 12px;border-radius:7px;border:1px solid rgba(79,158,255,.2);
+  background:rgba(79,158,255,.05);
+}
+.cn2{font-size:11px;color:#93c5fd;font-weight:500;line-height:1.3;}
+.cd{font-size:8px;color:var(--muted);margin-top:2px;font-family:'Space Mono',monospace;}
+
+.empty{text-align:center;padding:28px;color:var(--muted);font-size:10.5px;font-family:'Space Mono',monospace;letter-spacing:.03em;line-height:1.8;grid-column:1/-1;}
+
+/* ═══════════════════════════════════════════ EXPLORE MODE */
+.node.explore{
+  background:rgba(255,255,255,.04)!important;border-color:rgba(255,255,255,.12)!important;
+  opacity:1!important;cursor:pointer!important;
+}
+.node.explore .nn{color:var(--text)!important;}
+.node.explore:hover{border-color:rgba(255,255,255,.35)!important;background:rgba(255,255,255,.08)!important;}
+.btn.explore-btn{background:rgba(167,139,250,.09);border-color:rgba(167,139,250,.28);color:#c4b5fd;font-size:10px;}
+.btn.explore-btn.on{background:#a78bfa;border-color:#a78bfa;color:#000;font-weight:700;}
+
+/* ═══════════════════════════════════════════ HELP MODAL */
+.help-modal{
+  background:var(--surface2);border:1px solid var(--border);border-radius:12px;
+  width:560px;max-width:95vw;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 24px 60px rgba(0,0,0,.55);
+}
+.help-scroll{overflow-y:auto;padding:22px 24px;}
+.help-scroll::-webkit-scrollbar{width:4px;}
+.help-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.help-section{margin-bottom:22px;}
+.help-section h3{font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.help-section h3::after{content:'';flex:1;height:1px;background:rgba(79,158,255,.2);}
+.help-row{display:flex;gap:10px;margin-bottom:8px;align-items:flex-start;}
+.help-icon{width:28px;height:28px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.help-text{font-size:11px;line-height:1.6;color:var(--text);}
+.help-text strong{color:#e4e7f0;font-weight:600;}
+.htag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;font-family:'Space Mono',monospace;font-weight:700;vertical-align:middle;margin:0 2px;}
+.htg{background:rgba(34,197,94,.15);color:#4ade80;}
+.hta{background:rgba(245,158,11,.15);color:#fbbf24;}
+.htb{background:rgba(79,158,255,.15);color:#60a5fa;}
+.htm{background:rgba(74,80,104,.3);color:#9ca3af;}
+
+/* ═══════════════════════════════════════════ EQUIV MODAL */
+.equiv-modal{
+  background:var(--surface2);border:1px solid var(--border);border-radius:12px;
+  width:680px;max-width:95vw;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 24px 60px rgba(0,0,0,.55);
+}
+.equiv-scroll{overflow-y:auto;padding:0 0 8px;}
+.equiv-scroll::-webkit-scrollbar{width:4px;}
+.equiv-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.equiv-note{padding:12px 20px;background:rgba(245,158,11,.06);border-bottom:1px solid rgba(245,158,11,.15);font-size:10px;color:#fcd34d;font-family:'Space Mono',monospace;line-height:1.6;}
+table.etable{width:100%;border-collapse:collapse;}
+table.etable th{padding:8px 16px;font-family:'Space Mono',monospace;font-size:8.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);background:var(--surface);border-bottom:1px solid var(--border);text-align:left;position:sticky;top:0;z-index:1;}
+table.etable td{padding:9px 16px;font-size:11px;border-bottom:1px solid rgba(28,32,48,.8);vertical-align:middle;line-height:1.4;}
+table.etable tr:hover td{background:rgba(255,255,255,.02);}
+.e04{color:var(--muted);font-family:'Space Mono',monospace;font-size:10px;}
+.e23{color:var(--text);font-weight:500;}
+.etag{display:inline-block;padding:1px 5px;border-radius:3px;font-size:8px;font-family:'Space Mono',monospace;font-weight:700;margin-left:5px;}
+.etok{background:rgba(34,197,94,.15);color:#4ade80;}
+.etnw{background:rgba(167,139,250,.15);color:#a78bfa;}
+.etwn{background:rgba(245,158,11,.15);color:#fbbf24;}
+
+/* ═══════════════════════════════════════════ IO BAR */
+.io-bar{
+  padding:7px 24px;border-top:1px solid var(--border);
+  display:flex;gap:7px;align-items:center;background:var(--surface);flex-shrink:0;
+}
+.io-bar span{font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;}
+
+/* ═══════════════════════════════════════════ FOOTER */
+footer{
+  text-align:center;padding:13px;border-top:1px solid var(--border);
+  font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;
+  display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;
+}
+.ai-credit{
+  color:var(--accent);border:1px solid rgba(79,158,255,.25);border-radius:4px;
+  padding:1px 6px;font-size:8px;
+}
+.mail-link{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--border);transition:color .12s;}
+.mail-link:hover{color:var(--text);}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="hl">
+    <h1>Ing. Electrónica · Plan 2023 · UNCA</h1>
+    <p>Correlatividades + seguimiento de progreso académico</p>
+  </div>
+  <div class="header-right">
+    <button class="btn" style="font-size:10px;border-color:rgba(79,158,255,.2);color:var(--muted)" onclick="openHelp()">? Ayuda</button>
+    <button class="btn" style="font-size:10px;border-color:rgba(245,158,11,.2);color:#fbbf24" onclick="openEquiv()">⇄ Equiv. Plan 2004</button>
+    <button class="btn edit-btn" id="editToggle" onclick="toggleEdit()">✏ Editar progreso</button>
+    <button class="btn done-btn" id="doneBtn" style="display:none" onclick="toggleEdit()">✓ Listo</button>
+  </div>
+</header>
+
+<!-- EDIT BANNER -->
+<div class="edit-banner" id="editBanner">
+  <span>✏</span>
+  <span><strong>Modo edición activo</strong> — Hacé clic en cualquier materia para cambiar su estado. Los cambios se guardan automáticamente.</span>
+</div>
+
+<!-- EXPLORE BANNER -->
+<div class="edit-banner" id="exploreBanner" style="background:rgba(167,139,250,.07);border-bottom-color:rgba(167,139,250,.35);color:#c4b5fd;">
+  <span>◎</span>
+  <span><strong style="color:#e9d5ff">Modo exploración activo</strong> — Todas las materias son visibles e interactivas. Tu progreso real no cambia.</span>
+  <button class="btn" style="margin-left:auto;font-size:9.5px;padding:3px 10px;border-color:rgba(167,139,250,.3);color:#c4b5fd" onclick="toggleExplore()">Salir</button>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><span class="sv g" id="sA">0</span><span class="sl">APROBADAS</span></div>
+  <div class="stat"><span class="sv a" id="sR">0</span><span class="sl">REGULARES</span></div>
+  <div class="stat"><span class="sv b" id="sC">0</span><span class="sl">CURSABLES</span></div>
+  <div class="stat"><span class="sv" style="color:var(--muted)" id="sB">0</span><span class="sl">BLOQUEADAS</span></div>
+  <div class="stat" style="margin-left:auto"><span class="sv" style="color:var(--muted);font-size:13px" id="sT">0</span><span class="sl">TOTAL</span></div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab act" onclick="switchTab('mapa',this)">Mapa de correlatividades</button>
+  <button class="tab" onclick="switchTab('panel',this)">Regulares &amp; aprobadas</button>
+</div>
+
+<!-- TAB: MAPA -->
+<div class="tab-panel on" id="tab-mapa">
+  <div class="controls">
+    <span style="font-size:9px;color:var(--muted);font-family:'Space Mono',monospace">Filtrar:</span>
+    <button class="btn act" onclick="filt('all',this)">Todas</button>
+    <button class="btn g"   onclick="filt('aprobada',this)">✓ Aprobadas</button>
+    <button class="btn a"   onclick="filt('regular',this)">⏳ Regulares</button>
+    <button class="btn b"   onclick="filt('cursable',this)">→ Cursables</button>
+    <button class="btn"     onclick="clrSel()" style="margin-left:8px;font-size:10px">✕ Limpiar</button>
+    <button class="btn explore-btn" id="exploreBtn" onclick="toggleExplore()" style="margin-left:auto">◎ Explorar mapa</button>
+  </div>
+  <div class="info-bar empty" id="ib">← Hacé clic en una materia para ver sus correlatividades</div>
+  <div class="cw">
+    <div class="canvas view-mode" id="cv">
+      <svg class="arr" id="svg">
+        <defs>
+          <marker id="ad"   markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0L0,6L7,3z" fill="rgba(30,40,68,.7)"/></marker>
+          <marker id="apre" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0L0,6L8,3z" fill="#a78bfa"/></marker>
+          <marker id="apos" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0L0,6L8,3z" fill="#f59e0b"/></marker>
+        </defs>
+      </svg>
+      <div class="yc" id="yc"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: PANEL -->
+<div class="tab-panel" id="tab-panel">
+  <div class="panel">
+    <div class="ps">
+      <div class="pt">Regulares — por fecha de vencimiento <span class="pc" id="regCount">0</span></div>
+      <div class="rl" id="regList"><div class="empty">No hay materias regulares cargadas.<br>Usá el botón ✏ para cargar tu progreso.</div></div>
+    </div>
+    <div class="ps">
+      <div class="pt">Aprobadas <span class="pc" id="aprCount">0</span></div>
+      <div class="ag" id="aprList"><div class="empty">No hay materias aprobadas cargadas.</div></div>
+    </div>
+    <div class="ps">
+      <div class="pt">Podés cursar ahora <span class="pc" id="curCount">0</span></div>
+      <div class="ag" id="curList"><div class="empty">Cargá tus aprobadas para calcular qué podés cursar.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- IO BAR -->
+<div class="io-bar">
+  <span>Datos:</span>
+  <button class="btn save-btn" onclick="exportData()">↓ Exportar JSON</button>
+  <button class="btn save-btn" onclick="document.getElementById('importFile').click()">↑ Importar JSON</button>
+  <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+  <span style="margin-left:auto" id="saveStatus">—</span>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span>Bruno Ruartes</span>
+  <span style="color:var(--border)">·</span>
+  <span class="ai-credit">Claude AI</span>
+  <span style="color:var(--border)">·</span>
+  <span>2026</span>
+  <span style="color:var(--border)">·</span>
+  <a href="mailto:ruartesbruno@gmail.com" class="mail-link">ruartesbruno@gmail.com</a>
+</footer>
+
+<!-- MODAL EDICIÓN -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="mh">
+      <div>
+        <div class="mt" id="mTitle">—</div>
+        <div class="mc" id="mCode">—</div>
+      </div>
+      <button class="mx" onclick="closeModal()">×</button>
+    </div>
+    <div class="mb">
+      <div class="mlb">ESTADO ACTUAL</div>
+      <div class="sp">
+        <div class="spo" id="spLib" onclick="pickSt('libre')">
+          <div class="sp-ic">○</div><div class="sp-lb">LIBRE</div>
+        </div>
+        <div class="spo" id="spReg" onclick="pickSt('regular')">
+          <div class="sp-ic">⏳</div><div class="sp-lb">REGULAR</div>
+        </div>
+        <div class="spo" id="spApr" onclick="pickSt('aprobada')">
+          <div class="sp-ic">✓</div><div class="sp-lb">APROBADA</div>
+        </div>
+      </div>
+      <div class="xf" id="regF">
+        <div class="fg">
+          <label>FECHA DE VENCIMIENTO (del SIU Guaraní)</label>
+          <input type="date" id="fVenc">
+        </div>
+      </div>
+      <div class="xf" id="aprF">
+        <div class="fg">
+          <label>NOTA FINAL</label>
+          <input type="number" id="fNota" min="4" max="10" step="0.01" placeholder="ej: 8">
+        </div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="bd" onclick="clearSubject()">Borrar</button>
+      <button class="bs" onclick="closeModal()">Cancelar</button>
+      <button class="bp" onclick="saveSubject()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- HELP MODAL -->
+<div class="overlay" id="helpOverlay">
+  <div class="help-modal">
+    <div class="mh">
+      <div>
+        <div class="mt">Cómo usar esta herramienta</div>
+        <div class="mc">Guía rápida · Plan 2023 · UNCA</div>
+      </div>
+      <button class="mx" onclick="closeHelp()">×</button>
+    </div>
+    <div class="help-scroll">
+
+      <div class="help-section">
+        <h3>El mapa</h3>
+        <div class="help-row">
+          <div class="help-icon" style="background:rgba(34,197,94,.12)">✓</div>
+          <div class="help-text"><strong>Verde — Aprobada.</strong> Rendiste el examen final. Habilitás las materias que la tienen como correlativa.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-icon" style="background:rgba(245,158,11,.12)">⏳</div>
+          <div class="help-text"><strong>Amarillo — Regular.</strong> Aprobaste la cursada pero falta el final. Si tiene fecha de vencimiento cargada, el nodo muestra los días restantes y se pone rojo cuando quedan menos de 2 meses.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-icon" style="background:rgba(79,158,255,.12)">→</div>
+          <div class="help-text"><strong>Azul sólido — Cursable · final habilitado.</strong> Todos los prereqs están aprobados. Podés inscribirte y cuando la regularices, también podrás rendir el final de inmediato.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-icon" style="background:rgba(79,158,255,.08);border:1px dashed rgba(79,158,255,.4)">→</div>
+          <div class="help-text"><strong>Azul punteado — Cursable · final bloqueado.</strong> Todos los prereqs están al menos regulares, podés inscribirte. Pero al menos uno no está aprobado todavía, así que cuando regularices esta materia no vas a poder rendir el final hasta que ese prereq esté aprobado.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-icon" style="background:rgba(22,26,38,.8)">○</div>
+          <div class="help-text"><strong>Oscuro — Bloqueada.</strong> Falta aprobar al menos una correlativa previa. Al aprobarlas, se desbloquea automáticamente.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-icon" style="background:rgba(74,80,104,.2)">↗</div>
+          <div class="help-text"><strong>Clic en una materia</strong> → resalta en <span class="htag htm" style="background:rgba(167,139,250,.15);color:#a78bfa">violeta</span> sus prereqs y en <span class="htag" style="background:rgba(245,158,11,.15);color:#fbbf24">naranja</span> las materias que habilita. Las flechas del mapa también se activan.</div>
+        </div>
+      </div>
+
+      <div class="help-section">
+        <h3>Cargar tu progreso</h3>
+        <div class="help-row">
+          <div class="help-icon" style="background:rgba(249,115,22,.12)">✏</div>
+          <div class="help-text"><strong>Botón "Editar progreso"</strong> (arriba a la derecha) → activa el modo edición. En este modo, al hacer clic en cualquier materia se abre un panel para marcarla como <span class="htag htg">APROBADA</span> <span class="htag hta">REGULAR</span> o <span class="htag htm">LIBRE</span>.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-icon" style="background:rgba(245,158,11,.12)">📅</div>
+          <div class="help-text">Al marcar una materia como <strong>Regular</strong>, podés ingresar la <strong>fecha exacta de vencimiento</strong> tal como figura en el SIU Guaraní. La herramienta calculará automáticamente los días restantes.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-icon" style="background:rgba(34,197,94,.12)">10</div>
+          <div class="help-text">Al marcar como <strong>Aprobada</strong>, podés registrar la <strong>nota final</strong>. Se muestra en el nodo y en la pestaña "Regulares &amp; aprobadas".</div>
+        </div>
+        <div class="help-row">
+          <div class="help-icon" style="background:rgba(74,80,104,.2)">✓</div>
+          <div class="help-text">Cuando terminés, presioná <strong>"Listo"</strong> para volver al modo normal. <strong>Los cambios se guardan automáticamente</strong> en este navegador — no hace falta hacer nada extra.</div>
+        </div>
+      </div>
+
+      <div class="help-section">
+        <h3>Modo exploración</h3>
+        <div class="help-row">
+          <div class="help-icon" style="background:rgba(167,139,250,.12)">◎</div>
+          <div class="help-text"><strong>Botón "Explorar mapa"</strong> → desactiva temporalmente los colores de progreso y muestra todas las materias activas. Útil para ver las correlatividades de materias de años avanzados que de otro modo aparecen oscuras. Tu progreso guardado <strong>no se modifica</strong>.</div>
+        </div>
+      </div>
+
+      <div class="help-section">
+        <h3>Pestaña "Regulares &amp; aprobadas"</h3>
+        <div class="help-row">
+          <div class="help-icon" style="background:rgba(79,158,255,.12)">☰</div>
+          <div class="help-text">Muestra tus <strong>regulares ordenadas por urgencia</strong> (las que vencen primero, arriba), con semáforo de colores. También lista tus aprobadas con nota y calcula qué podés cursar ahora según tu progreso actual.</div>
+        </div>
+      </div>
+
+      <div class="help-section">
+        <h3>Exportar / Importar</h3>
+        <div class="help-row">
+          <div class="help-icon" style="background:rgba(74,80,104,.2)">↓</div>
+          <div class="help-text"><strong>Exportar JSON</strong> → descarga un archivo con todo tu progreso. Guardalo como respaldo o para transferir tu estado a otro dispositivo o navegador.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-icon" style="background:rgba(74,80,104,.2)">↑</div>
+          <div class="help-text"><strong>Importar JSON</strong> → carga un archivo exportado previamente. Reemplaza el estado actual con el del archivo.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- EQUIVALENCIAS MODAL -->
+<div class="overlay" id="equivOverlay">
+  <div class="equiv-modal">
+    <div class="mh">
+      <div>
+        <div class="mt">Equivalencias Plan 2004 → Plan 2023</div>
+        <div class="mc">Ordenanza CS-016/2004 · Resolución CD-008/2017 · FTyCA · UNCA</div>
+      </div>
+      <button class="mx" onclick="closeEquiv()">×</button>
+    </div>
+    <div class="equiv-note">
+      ⚠ Esta tabla es orientativa. <strong>Confirmá siempre tus equivalencias con Secretaría Académica antes de inscribirte.</strong>
+      Las equivalencias las otorga la Facultad de forma oficial — esta herramienta solo las muestra como referencia.
+    </div>
+    <div class="equiv-scroll">
+      <table class="etable">
+        <thead>
+          <tr>
+            <th style="width:48px">Cód. 2004</th>
+            <th>Materia Plan 2004</th>
+            <th style="width:48px">Cód. 2023</th>
+            <th>Equivale a (Plan 2023)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="e04">EL-101</td><td class="e04">Álgebra</td><td>EL-1001</td><td class="e23">Álgebra y Geometría Analítica I <span class="etag etok">directa</span></td></tr>
+          <tr><td class="e04">EL-106</td><td class="e04">Geometría Analítica</td><td>EL-1010</td><td class="e23">Álgebra y Geometría Analítica II <span class="etag etok">directa</span></td></tr>
+          <tr><td class="e04">EL-102</td><td class="e04">Física I</td><td>EL-1002</td><td class="e23">Física I <span class="etag etok">directa</span></td></tr>
+          <tr><td class="e04">EL-103</td><td class="e04">Sistemas de Representación</td><td>EL-1005</td><td class="e23">Sistemas de Representación <span class="etag etok">directa</span></td></tr>
+          <tr><td class="e04">EL-104</td><td class="e04">Análisis Matemático I <span style="font-size:9px;color:var(--muted)">(anual)</span></td><td>EL-1003</td><td class="e23">Análisis Matemático I <span class="etag etwn">parcial</span></td></tr>
+          <tr style="background:rgba(167,139,250,.04)"><td class="e04">—</td><td class="e04" style="color:#a78bfa;font-style:italic">Sin equivalente en Plan 2004</td><td>EL-1007</td><td class="e23" style="color:#c4b5fd">Análisis Matemático II <span class="etag etnw">nueva</span></td></tr>
+          <tr><td class="e04">EL-105</td><td class="e04">Fundamentos de Informática</td><td>EL-1004</td><td class="e23">Fundamentos de Informática <span class="etag etok">directa</span></td></tr>
+          <tr><td class="e04">EL-107</td><td class="e04">Química</td><td>EL-1009</td><td class="e23">Química General <span class="etag etok">directa</span></td></tr>
+          <tr><td class="e04">EL-204</td><td class="e04">Física II</td><td>EL-1008</td><td class="e23">Física II <span class="etag etok">directa</span></td></tr>
+          <tr style="background:rgba(167,139,250,.04)"><td class="e04">—</td><td class="e04" style="color:#a78bfa;font-style:italic">Sin equivalente en Plan 2004</td><td>EL-1006</td><td class="e23" style="color:#c4b5fd">Taller Introductorio <span class="etag etnw">nueva</span></td></tr>
+          <tr><td class="e04">EL-201</td><td class="e04">Probabilidad y Estadística</td><td>EL-2010</td><td class="e23">Probabilidad y Estadística <span class="etag etok">directa</span></td></tr>
+          <tr><td class="e04">EL-205</td><td class="e04">Informática</td><td>EL-2001</td><td class="e23">Informática <span class="etag etok">directa</span></td></tr>
+          <tr><td class="e04">EL-209</td><td class="e04">Materiales y Dispositivos Electrónicos</td><td>EL-2004</td><td class="e23">Dispositivos Electrónicos <span class="etag etok">directa</span></td></tr>
+          <tr><td class="e04">EL-207</td><td class="e04">Física Electrónica</td><td>EL-2008</td><td class="e23">Física Electrónica <span class="etag etok">directa</span></td></tr>
+          <tr><td class="e04">EL-202</td><td class="e04">Análisis Matemático II</td><td>EL-2002</td><td class="e23">Análisis Matemático III <span class="etag etwn">nota</span></td></tr>
+          <tr><td class="e04">EL-206</td><td class="e04">Cálculo Avanzado</td><td>EL-2006</td><td class="e23">Cálculo Avanzado <span class="etag etok">directa</span></td></tr>
+          <tr><td class="e04">EL-208</td><td class="e04">Electrotecnia I</td><td>EL-2007</td><td class="e23">Análisis de Circuitos <span class="etag etok">directa</span></td></tr>
+          <tr><td class="e04">EL-304</td><td class="e04">Electrónica I</td><td>EL-2009</td><td class="e23">Electrónica I <span class="etag etok">directa</span></td></tr>
+          <tr style="background:rgba(167,139,250,.04)"><td class="e04">—</td><td class="e04" style="color:#a78bfa;font-style:italic">Sin equivalente en Plan 2004</td><td>EL-2003</td><td class="e23" style="color:#c4b5fd">Física III <span class="etag etnw">nueva</span></td></tr>
+          <tr style="background:rgba(167,139,250,.04)"><td class="e04">—</td><td class="e04" style="color:#a78bfa;font-style:italic">Sin equivalente en Plan 2004</td><td>EL-2005</td><td class="e23" style="color:#c4b5fd">Cálculo Numérico <span class="etag etnw">nueva</span></td></tr>
+          <tr><td class="e04">EL-302</td><td class="e04">Medidas Eléctricas</td><td>EL-3002</td><td class="e23">Mediciones Electrónicas <span class="etag etok">directa</span></td></tr>
+          <tr><td class="e04">EL-203</td><td class="e04">Sistemas Lógicos I</td><td>EL-3003</td><td class="e23">Sistemas Lógicos I <span class="etag etok">directa</span></td></tr>
+          <tr><td class="e04">EL-301</td><td class="e04">Sistemas Lógicos II</td><td>EL-3008</td><td class="e23">Sistemas Lógicos II <span class="etag etok">directa</span></td></tr>
+          <tr><td class="e04">EL-305</td><td class="e04">Electrotecnia II</td><td>EL-3004</td><td class="e23">Electrotecnia <span class="etag etok">directa</span></td></tr>
+          <tr><td class="e04">EL-309</td><td class="e04">Electrónica II</td><td>EL-3001</td><td class="e23">Electrónica II <span class="etag etok">directa</span></td></tr>
+          <tr><td class="e04">EL-308</td><td class="e04">Taller Electrónico</td><td>EL-3006</td><td class="e23">Taller Electrónico <span class="etag etok">directa</span></td></tr>
+          <tr style="background:rgba(167,139,250,.04)"><td class="e04">—</td><td class="e04" style="color:#a78bfa;font-style:italic">Sin equivalente en Plan 2004</td><td>EL-3005</td><td class="e23" style="color:#c4b5fd">Análisis de Señales y Sistemas <span class="etag etnw">nueva</span></td></tr>
+          <tr><td class="e04">EL-403</td><td class="e04">Sistemas Microprogramables</td><td>EL-4003</td><td class="e23">Sistemas Lógicos III <span class="etag etok">directa</span></td></tr>
+          <tr><td class="e04">EL-405</td><td class="e04">Economía y Gestión Empresarial</td><td>EL-4005</td><td class="e23">Economía y Organización Industrial <span class="etag etok">directa</span></td></tr>
+          <tr><td class="e04">EL-408</td><td class="e04">Higiene y Seguridad Laboral</td><td>EL-4009</td><td class="e23">Gestión Ambiental e H. y Seg. <span class="etag etok">directa</span></td></tr>
+        </tbody>
+      </table>
+      <div style="padding:14px 20px;font-size:9.5px;color:var(--muted);font-family:'Space Mono',monospace;line-height:1.7;border-top:1px solid var(--border);margin-top:4px">
+        <strong style="color:var(--text)">Nota sobre AM I (Plan 2004, anual):</strong> Cubría más contenido que AM I del Plan 2023. La equivalencia oficial otorga solo EL-1003 (AM I). EL-1007 (AM II) no tiene equivalente y debe cursarse desde cero — pero sus prerequisitos son EL-1001 y EL-1003, que sí tienen equivalencia directa.<br><br>
+        <strong style="color:var(--text)">Referencias:</strong> <span style="color:#4ade80">directa</span> = equivalencia 1 a 1 confirmada · <span style="color:#fbbf24">parcial/nota</span> = hay diferencia de contenidos o nombre · <span style="color:#a78bfa">nueva</span> = no existía en Plan 2004, no tiene equivalente.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  PLAN 2023 — MATERIAS + CORRELATIVIDADES
+// ══════════════════════════════════════════════════════
+const S = [
+  // 1° AÑO
+  {id:"EL-1001",name:"Álgebra y Geometría Analítica I",   y:1,s:1,b:"CB",hs:75, p:[]},
+  {id:"EL-1002",name:"Física I",                          y:1,s:1,b:"CB",hs:90, p:[]},
+  {id:"EL-1003",name:"Análisis Matemático I",             y:1,s:1,b:"CB",hs:75, p:[]},
+  {id:"EL-1004",name:"Fundamentos de Informática",        y:1,s:1,b:"CB",hs:60, p:[]},
+  {id:"EL-1005",name:"Sistemas de Representación",        y:1,s:1,b:"CB",hs:60, p:[]},
+  {id:"EL-1006",name:"Taller Introductorio",              y:1,s:2,b:"TB",hs:90, p:[]},
+  {id:"EL-1007",name:"Análisis Matemático II",            y:1,s:2,b:"CB",hs:75, p:["EL-1001","EL-1003"]},
+  {id:"EL-1008",name:"Física II",                         y:1,s:2,b:"CB",hs:90, p:["EL-1002","EL-1003"]},
+  {id:"EL-1009",name:"Química General",                   y:1,s:2,b:"CB",hs:90, p:[]},
+  {id:"EL-1010",name:"Álgebra y Geometría Analítica II",  y:1,s:2,b:"CB",hs:75, p:["EL-1001"]},
+  // 2° AÑO
+  {id:"EL-2001",name:"Informática",                       y:2,s:3,b:"TA",hs:90, p:["EL-1004"]},
+  {id:"EL-2002",name:"Análisis Matemático III",           y:2,s:3,b:"CB",hs:75, p:["EL-1007","EL-1010"]},
+  {id:"EL-2003",name:"Física III",                        y:2,s:3,b:"CB",hs:90, p:["EL-1007","EL-1008"]},
+  {id:"EL-2004",name:"Dispositivos Electrónicos",         y:2,s:3,b:"TB",hs:75, p:["EL-1006","EL-1008"]},
+  {id:"EL-2005",name:"Cálculo Numérico",                  y:2,s:3,b:"CB",hs:60, p:["EL-1007","EL-1010"]},
+  {id:"EL-2006",name:"Cálculo Avanzado",                  y:2,s:4,b:"CB",hs:75, p:["EL-1010","EL-2002"]},
+  {id:"EL-2007",name:"Análisis de Circuitos",             y:2,s:4,b:"TB",hs:90, p:["EL-2003","EL-2004"]},
+  {id:"EL-2008",name:"Física Electrónica",                y:2,s:4,b:"TB",hs:90, p:["EL-1009","EL-2003"]},
+  {id:"EL-2009",name:"Electrónica I",                     y:2,s:4,b:"TB",hs:75, p:["EL-2003","EL-2004"]},
+  {id:"EL-2010",name:"Probabilidad y Estadística",        y:2,s:4,b:"CB",hs:75, p:["EL-2001","EL-1007"]},
+  // 3° AÑO
+  {id:"EL-3001",name:"Electrónica II",                    y:3,s:5,b:"TB",hs:75, p:["EL-2007","EL-2009"]},
+  {id:"EL-3002",name:"Mediciones Electrónicas",           y:3,s:5,b:"TB",hs:90, p:["EL-2010","EL-2007"]},
+  {id:"EL-3003",name:"Sistemas Lógicos I",                y:3,s:5,b:"TA",hs:90, p:["EL-2001","EL-2004"]},
+  {id:"EL-3004",name:"Electrotecnia",                     y:3,s:5,b:"TB",hs:60, p:["EL-2006","EL-2007"]},
+  {id:"EL-3005",name:"Análisis de Señales y Sistemas",    y:3,s:5,b:"TB",hs:90, p:["EL-2005","EL-2006"]},
+  {id:"EL-3006",name:"Taller Electrónico",                y:3,s:6,b:"TA",hs:90, p:["EL-3001","EL-3002","EL-3003"]},
+  {id:"EL-3007",name:"Teoría de Circuitos",               y:3,s:6,b:"TB",hs:90, p:["EL-3004","EL-3005"]},
+  {id:"EL-3008",name:"Sistemas Lógicos II",               y:3,s:6,b:"TA",hs:90, p:["EL-3002","EL-3003"]},
+  {id:"EL-3009",name:"Legislación y Ética Profesional",   y:3,s:6,b:"C", hs:60, p:["EL-1005"]},
+  // 4° AÑO
+  {id:"EL-4001",name:"Sistemas de Comunicaciones",        y:4,s:7,b:"TB",hs:90, p:["EL-3006","EL-3007"]},
+  {id:"EL-4002",name:"Electrónica III",                   y:4,s:7,b:"TA",hs:75, p:["EL-3001","EL-3007"]},
+  {id:"EL-4003",name:"Sistemas Lógicos III",              y:4,s:7,b:"TA",hs:90, p:["EL-3006","EL-3008"]},
+  {id:"EL-4004",name:"Sistemas de Control I",             y:4,s:7,b:"TB",hs:90, p:["EL-3001","EL-3005"]},
+  {id:"EL-4005",name:"Economía y Organización Industrial",y:4,s:8,b:"C", hs:60, p:["EL-3009"]},
+  {id:"EL-4006",name:"Campos y Ondas Electromagnéticas",  y:4,s:8,b:"TA",hs:90, p:["EL-2008","EL-3006"]},
+  {id:"EL-4007",name:"Protocolo Comunicaciones y Redes",  y:4,s:8,b:"TA",hs:75, p:["EL-4001","EL-4003"]},
+  {id:"EL-4008",name:"Sistemas de Control II",            y:4,s:8,b:"TA",hs:90, p:["EL-4004"]},
+  {id:"EL-4009",name:"Gestión Ambiental e H. y Seg.",     y:4,s:8,b:"C", hs:60, p:["EL-3009"]},
+  // 5° AÑO
+  {id:"EL-5001",name:"Automatización Industrial",         y:5,s:9, b:"TA",hs:90, p:["EL-4002","EL-4008"]},
+  {id:"EL-5002",name:"Instrumentación Electrónica",       y:5,s:9, b:"TA",hs:90, p:["EL-4003","EL-4007"]},
+  {id:"EL-5003",name:"Electrónica de RF",                 y:5,s:9, b:"TA",hs:90, p:["EL-4002","EL-4006"]},
+  {id:"OPT-1",  name:"Optativa 1",                        y:5,s:9, b:"TA",hs:75, p:[], opt:true},
+  {id:"EL-5004",name:"Gestión de Proyectos de Ingeniería",y:5,s:10,b:"C", hs:60, p:["EL-4005","EL-4009"]},
+  {id:"EL-5005",name:"Accionamientos Eléctricos",         y:5,s:10,b:"TA",hs:90, p:["EL-5001"]},
+  {id:"OPT-2",  name:"Optativa 2",                        y:5,s:10,b:"TA",hs:75, p:[], opt:true},
+  {id:"OPT-3",  name:"Optativa 3",                        y:5,s:10,b:"TA",hs:75, p:[], opt:true},
+  {id:"PPS",    name:"Práctica Prof. Supervisada",        y:4,s:8, b:"PPS",hs:200,p:[],sp:"3° año aprobado"},
+  {id:"TF",     name:"Trabajo Final",                     y:5,s:10,b:"TF", hs:200,p:[],sp:"4° año + PPS"},
+];
+
+// ══════════════════════════════════════════════════════
+//  ESTADO — localStorage, arranca vacío
+// ══════════════════════════════════════════════════════
+const LS = 'unca_electronica_2023_v1';
+let state = {};
+
+function loadState() {
+  try { const r=localStorage.getItem(LS); state=r?JSON.parse(r):{}; }
+  catch(e){ state={}; }
+}
+function saveState() {
+  try {
+    localStorage.setItem(LS,JSON.stringify(state));
+    const n=new Date();
+    document.getElementById('saveStatus').textContent=
+      `Guardado ${n.getHours()}:${String(n.getMinutes()).padStart(2,'0')}`;
+  } catch(e){ document.getElementById('saveStatus').textContent='Error'; }
+}
+
+// ══════════════════════════════════════════════════════
+//  STATUS LOGIC
+//  Para CURSAR: todos los prereqs regulares o aprobados
+//  Para RENDIR: todos los prereqs aprobados
+// ══════════════════════════════════════════════════════
+function isRegularOrApr(id) {
+  const st = state[id]?.st;
+  return st === 'regular' || st === 'aprobada';
+}
+function isApr(id) {
+  return state[id]?.st === 'aprobada';
+}
+
+function getSt(s) {
+  const e = state[s.id];
+  if (e?.st === 'aprobada') return 'aprobada';
+  if (e?.st === 'regular')  return 'regular';
+  // Sin prereqs → siempre cursable
+  if (s.p.length === 0) return 'cursable';
+  // ¿Todos los prereqs al menos regulares? → se puede cursar
+  const puedesCursar = s.p.every(pid => isRegularOrApr(pid));
+  if (!puedesCursar) return 'bloqueada';
+  // ¿Todos los prereqs aprobados? → cursable sin restricción de final
+  const finalOk = s.p.every(pid => isApr(pid));
+  return finalOk ? 'cursable' : 'cursable-warn';
+}
+
+// ¿Puede rendir el final una materia regular?
+function finalHabilitado(s) {
+  return s.p.every(pid => isApr(pid));
+}
+
+function daysUntil(d) {
+  if(!d) return null;
+  const t=new Date(d),n=new Date();
+  t.setHours(0,0,0,0);n.setHours(0,0,0,0);
+  return Math.round((t-n)/86400000);
+}
+
+function urgCls(days) {
+  if(days===null) return '';
+  if(days<=60)  return 'vc-critico';
+  if(days<=180) return 'vc-pronto';
+  return '';
+}
+
+// ══════════════════════════════════════════════════════
+//  BUILD MAP
+// ══════════════════════════════════════════════════════
+const BLQ={CB:"tcb",TB:"ttb",TA:"tta",C:"tcc",PPS:"tcc",TF:"tcc"};
+const YC=["","y1","y2","y3","y4","y5"];
+let selId=null,filtMode='all',editMode=false;
+
+function build(){
+  const yc=document.getElementById('yc'); yc.innerHTML='';
+  const YN=['','1° Año','2° Año','3° Año','4° Año','5° Año'];
+  const YH=[0,780,795,735,920,965];
+  for(let y=1;y<=5;y++){
+    const col=document.createElement('div');col.className='yco';
+    const hdr=document.createElement('div');hdr.className='yh';
+    hdr.innerHTML=`<span>${YN[y]}</span><span class="hs">${YH[y]}hs</span>`;
+    col.appendChild(hdr);
+    const sems=[...new Set(S.filter(s=>s.y===y&&!s.opt&&s.id!=='PPS'&&s.id!=='TF').map(s=>s.s))].sort((a,b)=>a-b);
+    for(const sem of sems){
+      const g=document.createElement('div');g.className='sg';
+      const l=document.createElement('div');l.className='sl2';
+      l.textContent=sem%2===1?'1° Cuatrimestre':'2° Cuatrimestre';
+      g.appendChild(l);
+      S.filter(s=>s.y===y&&s.s===sem&&!s.opt&&s.id!=='PPS'&&s.id!=='TF').forEach(s=>g.appendChild(mkN(s,y)));
+      if(y===5&&sem===9)  S.filter(s=>s.opt&&s.s===9).forEach(s=>g.appendChild(mkN(s,y)));
+      if(y===5&&sem===10){ S.filter(s=>s.opt&&s.s===10).forEach(s=>g.appendChild(mkN(s,y))); g.appendChild(mkN(S.find(s=>s.id==='TF'),y)); }
+      col.appendChild(g);
+    }
+    if(y===4){
+      const g=document.createElement('div');g.className='sg';
+      const l=document.createElement('div');l.className='sl2';l.textContent='Desde 3° completo';
+      g.appendChild(l);g.appendChild(mkN(S.find(s=>s.id==='PPS'),y));col.appendChild(g);
+    }
+    yc.appendChild(col);
+  }
+  updStats(); buildPanel();
+}
+
+function mkN(s,y){
+  const st=getSt(s);
+  const e=state[s.id];
+  const days=st==='regular'?daysUntil(e?.venc):null;
+  const nd=document.createElement('div');
+  nd.className=`node ${st} ${urgCls(days)}`;
+  nd.id='n-'+s.id; nd.dataset.id=s.id;
+  const b=document.createElement('div');b.className=`lb ${YC[y]}-b`;nd.appendChild(b);
+  const c=document.createElement('div');c.className='nc';c.textContent=s.id;nd.appendChild(c);
+  const n=document.createElement('div');n.className='nn';n.textContent=s.name;nd.appendChild(n);
+  const m=document.createElement('div');m.className='nm';
+  const t=document.createElement('span');t.className=`tag ${BLQ[s.b]||'tcc'}`;t.textContent=s.b;m.appendChild(t);
+
+  if(st==='aprobada'){
+    const b2=document.createElement('span');b2.className='sb sa';
+    b2.textContent=e?.nota?`✓ ${e.nota}`:'✓ APR';m.appendChild(b2);
+  } else if(st==='regular'){
+    const b2=document.createElement('span');b2.className='sb sr';b2.textContent='⏳ REG';m.appendChild(b2);
+    // ¿puede rendir el final?
+    const finOk=finalHabilitado(s);
+    const b3=document.createElement('span');
+    b3.className=`sb ${finOk?'sa':'sf'}`;
+    b3.textContent=finOk?'✓ final hab.':'✗ final bloq.';m.appendChild(b3);
+    // días de vencimiento
+    if(days!==null){
+      const b4=document.createElement('span');
+      b4.className=`sb ${days<=0?'sd':days<=60?'sd':days<=180?'sr':'sa'}`;
+      b4.textContent=days<=0?'¡VENC!':days>365?`${Math.floor(days/30)}m`:`${days}d`;
+      m.appendChild(b4);
+    }
+  } else if(st==='cursable'){
+    const b2=document.createElement('span');b2.className='sb sc';b2.textContent='→ CURSÁ';m.appendChild(b2);
+  } else if(st==='cursable-warn'){
+    const b2=document.createElement('span');b2.className='sb sc';b2.textContent='→ CURSÁ';m.appendChild(b2);
+    const b3=document.createElement('span');b3.className='sb sf';b3.textContent='✗ final bloq.';m.appendChild(b3);
+  }
+  if(s.sp){
+    const sp=document.createElement('span');
+    sp.style.cssText='font-size:7px;color:var(--muted);font-family:Space Mono,monospace;margin-left:auto';
+    sp.textContent=s.sp;m.appendChild(sp);
+  }
+  nd.appendChild(m);
+  nd.addEventListener('click',()=>editMode?openModal(s.id):handleNodeClick(s.id));
+  return nd;
+}
+
+function updStats(){
+  let a=0,r=0,c=0,b=0;
+  S.forEach(s=>{
+    const st=getSt(s);
+    if(st==='aprobada')a++;
+    else if(st==='regular')r++;
+    else if(st==='cursable'||st==='cursable-warn')c++;
+    else b++;
+  });
+  document.getElementById('sA').textContent=a;
+  document.getElementById('sR').textContent=r;
+  document.getElementById('sC').textContent=c;
+  document.getElementById('sB').textContent=b;
+  document.getElementById('sT').textContent=S.length;
+}
+
+// ══════════════════════════════════════════════════════
+//  PANEL
+// ══════════════════════════════════════════════════════
+function buildPanel(){
+  // regulares — con indicador de final habilitado/bloqueado
+  const regs=S.filter(s=>getSt(s)==='regular')
+    .map(s=>({s,days:daysUntil(state[s.id]?.venc),venc:state[s.id]?.venc,finOk:finalHabilitado(s)}))
+    .sort((a,b)=>{if(a.days===null&&b.days===null)return 0;if(a.days===null)return 1;if(b.days===null)return -1;return a.days-b.days;});
+  const rl=document.getElementById('regList');
+  document.getElementById('regCount').textContent=regs.length;
+  if(!regs.length){ rl.innerHTML='<div class="empty">No hay materias regulares cargadas.<br>Usá el botón ✏ para cargar tu progreso.</div>'; }
+  else {
+    rl.innerHTML='';
+    regs.forEach(({s,days,venc,finOk})=>{
+      const dot=days===null?'#4a5068':days<=0?'#ef4444':days<=60?'#ef4444':days<=180?'#f59e0b':'#22c55e';
+      const dlbl=days===null?'sin fecha':days<=0?'¡VENCIDA!':days>365?`${Math.floor(days/30)} meses`:days>30?`${Math.round(days/7)} sem`:`${days} días`;
+      const dcls=days===null?'':days<=60?'cr':days<=180?'co':'cg';
+      const vstr=venc?new Date(venc+'T12:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'}):'sin fecha';
+      const finBadge=finOk
+        ?'<span style="font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(34,197,94,.13);color:#4ade80;font-family:Space Mono,monospace;font-weight:700">✓ final hab.</span>'
+        :'<span style="font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(239,68,68,.1);color:#fca5a5;border:1px solid rgba(239,68,68,.18);font-family:Space Mono,monospace;font-weight:700">✗ final bloq.</span>';
+      const card=document.createElement('div');card.className='rc';
+      card.innerHTML=`<div class="ud" style="background:${dot}"></div><div style="flex:1"><div class="rn">${s.name}</div><div class="rk" style="display:flex;gap:6px;align-items:center;margin-top:3px">${finBadge}<span>${s.id} · Vence: ${vstr}</span></div></div><div class="rd"><div class="rdy ${dcls}">${dlbl}</div><div class="re">${days!==null&&days>0?'restantes':''}</div></div>`;
+      rl.appendChild(card);
+    });
+  }
+  // aprobadas
+  const aprs=S.filter(s=>getSt(s)==='aprobada').sort((a,b)=>a.y-b.y||a.s-b.s);
+  const al=document.getElementById('aprList');
+  document.getElementById('aprCount').textContent=aprs.length;
+  if(!aprs.length){ al.innerHTML='<div class="empty">No hay materias aprobadas.</div>'; }
+  else {
+    al.innerHTML='';
+    aprs.forEach(s=>{
+      const card=document.createElement('div');card.className='ac';
+      card.innerHTML=`<div class="an">${s.name}<br><span style="font-size:8px;opacity:.4;font-family:Space Mono,monospace">${s.id}</span></div><div class="aN">${state[s.id]?.nota||'—'}</div>`;
+      al.appendChild(card);
+    });
+  }
+  // cursables — incluye cursable y cursable-warn
+  const curs=S.filter(s=>getSt(s)==='cursable'||getSt(s)==='cursable-warn').sort((a,b)=>a.y-b.y||a.s-b.s);
+  const cl=document.getElementById('curList');
+  document.getElementById('curCount').textContent=curs.length;
+  if(!curs.length){ cl.innerHTML='<div class="empty">Cargá tus aprobadas para calcular qué podés cursar.</div>'; }
+  else {
+    cl.innerHTML='';
+    curs.forEach(s=>{
+      const warn = getSt(s)==='cursable-warn';
+      const card=document.createElement('div');card.className='cc2';
+      card.style.borderColor = warn ? 'rgba(79,158,255,.18)' : 'rgba(79,158,255,.22)';
+      card.style.borderStyle = warn ? 'dashed' : 'solid';
+      const finBadge=warn
+        ?'<span style="font-size:7.5px;padding:1px 5px;border-radius:3px;background:rgba(239,68,68,.1);color:#fca5a5;border:1px solid rgba(239,68,68,.18);font-family:Space Mono,monospace;font-weight:700">✗ final bloq.</span>'
+        :'<span style="font-size:7.5px;padding:1px 5px;border-radius:3px;background:rgba(34,197,94,.13);color:#4ade80;font-family:Space Mono,monospace;font-weight:700">✓ final hab.</span>';
+      card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px"><div class="cn2">${s.name}</div>${finBadge}</div><div class="cd">${s.id} · ${s.y}° año · ${s.b}</div>`;
+      cl.appendChild(card);
+    });
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  VIEW MODE — correlatividades
+// ══════════════════════════════════════════════════════
+function viewClick(id){
+  if(selId===id){clrSel();return;}
+  selId=id;
+  const s=S.find(x=>x.id===id); const st=getSt(s);
+  const pre=s.p; const pos=S.filter(x=>x.p.includes(id)).map(x=>x.id);
+  const stL={
+    aprobada:'✓ APROBADA',
+    regular: finalHabilitado(s)?'⏳ REGULAR · ✓ final hab.':'⏳ REGULAR · ✗ final bloq.',
+    cursable:'→ CURSABLE · ✓ final hab.',
+    'cursable-warn':'→ CURSABLE · ✗ final bloq.',
+    bloqueada:'🔒 BLOQUEADA'
+  }[st]||st;
+  const ib=document.getElementById('ib'); ib.className='info-bar';
+  const preN=pre.map(p=>S.find(x=>x.id===p)?.name||p).join(' · ')||'—';
+  const posN=pos.map(p=>S.find(x=>x.id===p)?.name||p).join(' · ')||'—';
+  ib.innerHTML=`<strong>${s.name}</strong> &nbsp;·&nbsp; ${stL} &nbsp;|&nbsp; Requiere: <span style="color:#a78bfa">${preN}</span> &nbsp;|&nbsp; Habilita: <span style="color:#f59e0b">${posN}</span>`;
+  S.forEach(sub=>{
+    const el=document.getElementById('n-'+sub.id);if(!el)return;
+    el.classList.remove('sel-on','sel-pre','sel-pos','sel-dim');
+    if(sub.id===id) el.classList.add('sel-on');
+    else if(pre.includes(sub.id)) el.classList.add('sel-pre');
+    else if(pos.includes(sub.id)) el.classList.add('sel-pos');
+    else el.classList.add('sel-dim');
+  });
+  drawArr(id);
+}
+
+function clrSel(){
+  selId=null;
+  const ib=document.getElementById('ib');ib.className='info-bar empty';
+  ib.innerHTML='← Hacé clic en una materia para ver sus correlatividades';
+  S.forEach(s=>{const el=document.getElementById('n-'+s.id);if(!el)return;el.classList.remove('sel-on','sel-pre','sel-pos','sel-dim');apFilt(el,s);});
+  drawArr(null);
+}
+
+function apFilt(el,s){
+  if(filtMode==='all'){el.style.opacity='';return;}
+  const st=getSt(s);
+  const match = st===filtMode || (filtMode==='cursable' && st==='cursable-warn');
+  el.style.opacity=match?'':'0.07';
+}
+function filt(mode,btn){
+  filtMode=mode;
+  document.querySelectorAll('.controls .btn').forEach(b=>b.classList.remove('act'));btn.classList.add('act');
+  clrSel(); S.forEach(s=>{const el=document.getElementById('n-'+s.id);if(el)apFilt(el,s);});
+}
+
+// ══════════════════════════════════════════════════════
+//  ARROWS
+// ══════════════════════════════════════════════════════
+function ctr(id){
+  const el=document.getElementById('n-'+id);if(!el)return null;
+  const cr=document.getElementById('cv').getBoundingClientRect();
+  const er=el.getBoundingClientRect();
+  return{right:er.right-cr.left,left:er.left-cr.left,y:er.top-cr.top+er.height/2};
+}
+function drawArr(activeId=null){
+  const svg=document.getElementById('svg');
+  while(svg.children.length>1)svg.removeChild(svg.lastChild);
+  const pairs=[];S.forEach(s=>s.p.forEach(pid=>pairs.push({from:pid,to:s.id})));
+  const pre=activeId?(S.find(x=>x.id===activeId)?.p||[]):[];
+  const pos=activeId?S.filter(s=>s.p.includes(activeId)).map(s=>s.id):[];
+  for(const p of pairs){
+    const f=ctr(p.from),t=ctr(p.to);if(!f||!t)continue;
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    const dx=Math.abs(t.left-f.right)*.45;
+    path.setAttribute('d',`M${f.right-1},${f.y} C${f.right+dx},${f.y} ${t.left-dx},${t.y} ${t.left+1},${t.y}`);
+    path.setAttribute('class','al');
+    if(activeId){
+      if(p.to===activeId&&pre.includes(p.from))path.classList.add('ap');
+      else if(p.from===activeId&&pos.includes(p.to))path.classList.add('ao');
+      else path.classList.add('ad');
+    }
+    svg.appendChild(path);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  EDIT MODE
+// ══════════════════════════════════════════════════════
+function toggleEdit(){
+  editMode=!editMode;
+  document.getElementById('editToggle').style.display=editMode?'none':'';
+  document.getElementById('doneBtn').style.display=editMode?'':'none';
+  document.getElementById('editBanner').classList.toggle('on',editMode);
+  document.getElementById('cv').className=editMode?'canvas edit-mode':'canvas view-mode';
+  clrSel();
+  if(!editMode){ build(); setTimeout(()=>drawArr(null),150); }
+}
+
+// ══════════════════════════════════════════════════════
+//  MODAL
+// ══════════════════════════════════════════════════════
+let modalId=null,pickedSt=null;
+
+function openModal(id){
+  modalId=id;
+  const s=S.find(x=>x.id===id); const e=state[id];
+  document.getElementById('mTitle').textContent=s.name;
+  document.getElementById('mCode').textContent=id+' · '+s.y+'° año';
+  pickedSt=e?.st||'libre';
+  renderPicker();
+  document.getElementById('fNota').value=e?.nota||'';
+  document.getElementById('fVenc').value=e?.venc||'';
+  document.getElementById('overlay').classList.add('on');
+}
+function renderPicker(){
+  ['spLib','spReg','spApr'].forEach(id=>document.getElementById(id).className='spo');
+  if(pickedSt==='aprobada')document.getElementById('spApr').classList.add('s-apr');
+  if(pickedSt==='regular') document.getElementById('spReg').classList.add('s-reg');
+  if(pickedSt==='libre')   document.getElementById('spLib').classList.add('s-lib');
+  document.getElementById('aprF').className=pickedSt==='aprobada'?'xf on':'xf';
+  document.getElementById('regF').className=pickedSt==='regular' ?'xf on':'xf';
+}
+function pickSt(st){ pickedSt=st; renderPicker(); }
+function closeModal(){ document.getElementById('overlay').classList.remove('on'); modalId=null; pickedSt=null; }
+function saveSubject(){
+  if(!modalId)return;
+  if(pickedSt==='libre') delete state[modalId];
+  else if(pickedSt==='aprobada') state[modalId]={st:'aprobada',nota:parseFloat(document.getElementById('fNota').value)||null};
+  else if(pickedSt==='regular')  state[modalId]={st:'regular',venc:document.getElementById('fVenc').value||''};
+  saveState(); closeModal(); build(); setTimeout(()=>drawArr(null),160);
+}
+function clearSubject(){
+  if(!modalId)return;
+  delete state[modalId]; saveState(); closeModal(); build(); setTimeout(()=>drawArr(null),160);
+}
+document.getElementById('overlay').addEventListener('click',e=>{ if(e.target===document.getElementById('overlay'))closeModal(); });
+
+// ══════════════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════════════
+function switchTab(name,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('act'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('act');
+  document.getElementById('tab-'+name).classList.add('on');
+  if(name==='panel')buildPanel();
+}
+
+// ══════════════════════════════════════════════════════
+//  IMPORT / EXPORT
+// ══════════════════════════════════════════════════════
+function exportData(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`plan_electronica_${new Date().toISOString().slice(0,10)}.json`;a.click();
+}
+function importData(e){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{ state=JSON.parse(ev.target.result); saveState(); build(); setTimeout(()=>drawArr(null),160); document.getElementById('saveStatus').textContent='Importado ✓'; }
+    catch(err){ alert('Archivo JSON inválido.'); }
+  };
+  r.readAsText(file); e.target.value='';
+}
+
+// ══════════════════════════════════════════════════════
+//  EXPLORE MODE — muestra todo sin colores de progreso
+// ══════════════════════════════════════════════════════
+let exploreMode = false;
+
+function handleNodeClick(id) {
+  exploreMode ? exploreClick(id) : viewClick(id);
+}
+
+function exploreClick(id) {
+  if (selId===id) { clrSel(); return; }
+  selId=id;
+  const s=S.find(x=>x.id===id);
+  const pre=s.p; const pos=S.filter(x=>x.p.includes(id)).map(x=>x.id);
+  const ib=document.getElementById('ib'); ib.className='info-bar';
+  const preN=pre.map(p=>S.find(x=>x.id===p)?.name||p).join(' · ')||'—';
+  const posN=pos.map(p=>S.find(x=>x.id===p)?.name||p).join(' · ')||'—';
+  ib.innerHTML=`<strong>${s.name}</strong> &nbsp;·&nbsp; ${s.y}° año &nbsp;|&nbsp; Requiere: <span style="color:#a78bfa">${preN}</span> &nbsp;|&nbsp; Habilita: <span style="color:#f59e0b">${posN}</span>`;
+  S.forEach(sub=>{
+    const el=document.getElementById('n-'+sub.id);if(!el)return;
+    el.classList.remove('sel-on','sel-pre','sel-pos','sel-dim');
+    if(sub.id===id) el.classList.add('sel-on');
+    else if(pre.includes(sub.id)) el.classList.add('sel-pre');
+    else if(pos.includes(sub.id)) el.classList.add('sel-pos');
+    else el.classList.add('sel-dim');
+  });
+  drawArr(id);
+}
+
+function toggleExplore() {
+  exploreMode = !exploreMode;
+  const btn = document.getElementById('exploreBtn');
+  const banner = document.getElementById('exploreBanner');
+  btn.classList.toggle('on', exploreMode);
+  btn.textContent = exploreMode ? '◎ Salir de exploración' : '◎ Explorar mapa';
+  banner.classList.toggle('on', exploreMode);
+  if (exploreMode && editMode) toggleEdit();
+
+  S.forEach(s => {
+    const el = document.getElementById('n-' + s.id); if (!el) return;
+    if (exploreMode) {
+      el.className = 'node explore';
+      el.style.opacity = '';
+    } else {
+      const st = getSt(s);
+      const days = st==='regular' ? daysUntil(state[s.id]?.venc) : null;
+      el.className = `node ${st} ${urgCls(days)}`;
+      el.style.opacity = '';
+    }
+  });
+  clrSel();
+}
+
+// ══════════════════════════════════════════════════════
+//  HELP MODAL
+// ══════════════════════════════════════════════════════
+function openHelp()  { document.getElementById('helpOverlay').classList.add('on'); }
+function closeHelp() { document.getElementById('helpOverlay').classList.remove('on'); }
+document.getElementById('helpOverlay').addEventListener('click', e => { if(e.target===document.getElementById('helpOverlay')) closeHelp(); });
+
+// ══════════════════════════════════════════════════════
+//  EQUIVALENCIAS MODAL
+// ══════════════════════════════════════════════════════
+function openEquiv()  { document.getElementById('equivOverlay').classList.add('on'); }
+function closeEquiv() { document.getElementById('equivOverlay').classList.remove('on'); }
+document.getElementById('equivOverlay').addEventListener('click', e => { if(e.target===document.getElementById('equivOverlay')) closeEquiv(); });
+
+// ══════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════
+loadState();
+build();
+setTimeout(()=>{
+  drawArr(null);
+  const c=document.getElementById('cv');
+  document.getElementById('svg').setAttribute('width',c.scrollWidth);
+  document.getElementById('svg').setAttribute('height',c.scrollHeight);
+},200);
+document.querySelector('.cw').addEventListener('scroll',()=>drawArr(selId));
+window.addEventListener('resize',()=>drawArr(selId));
+</script>
+</body>
+</html>
